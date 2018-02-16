@@ -98,8 +98,8 @@ int main(){
         const string& model_file = "/home/cookie/ssd/ssd/deploy.prototxt";
         const string& weights_file = "/home/cookie/ssd/ssd/VGG_VOC0712_SSD_300x300_iter_120000.caffemodel";
         Detector detector(model_file, weights_file,"","104,117,123");
-        cv::VideoCapture capture("/home/cookie/Fusion/DSCF0570.m4v");
-        //cv::VideoCapture capture(0);
+        //cv::VideoCapture capture("/home/cookie/Fusion/DSCF0570.m4v");
+        cv::VideoCapture capture(0);
             if(!capture.isOpened())
                 return 1;
         cv::Mat frame,Orgframe;
@@ -125,7 +125,7 @@ int main(){
                 const vector<float>& d = detections[i];
                 CHECK_EQ(d.size(), 7);
                 const float score = d[2];
-                if (score>0.15 && static_cast<int>(d[1]) == 7){
+                if (score>0.45 && static_cast<int>(d[1]) == 7){//15 person
 
                 CvPoint x1(d[3] * frame.cols,d[4] * frame.rows),x2(d[5] * frame.cols,d[6] * frame.rows);
                 stringstream stream;
@@ -136,16 +136,17 @@ int main(){
 
                 //printf("score: %f x1.x: %d x1.y: %d x2.x: %d x2.y: %d\n", score, x1.x, x1.y, x2.x, x2.y);
                 for(unsigned int i = 0; i < RadarDataTable.size(); i++){
-                    if((((float)(x1.x - frame.cols / 2)*35.0 / (float)frame.cols) <= RadarDataTable[i].angle) &&
-                       (((float)(x2.x - frame.cols / 2)*35.0 / (float)frame.cols) >= RadarDataTable[i].angle )){
+                    if(RadarDataTable[i].dist == 0) continue;
+                    if((((float)(x1.x - frame.cols / 2)*75.0 / (float)frame.cols) <= RadarDataTable[i].angle) &&
+                       (((float)(x2.x - frame.cols / 2)*75.0 / (float)frame.cols) >= RadarDataTable[i].angle )){
 
-                        //printf("ID: %d Dist: %f Angle: %f Vel: %f\n",RadarDataTable[i].ID, RadarDataTable[i].dist, RadarDataTable[i].angle, RadarDataTable[i].vel);
+                        printf("ID: %d Dist: %f Angle: %f Vel: %f\n",RadarDataTable[i].ID, RadarDataTable[i].dist, RadarDataTable[i].angle, RadarDataTable[i].vel);
                         stringstream radar;
                         radar << fixed << setprecision(2) << RadarDataTable[i].dist<<" "<<RadarDataTable[i].angle<<" "<<RadarDataTable[i].vel;
                         string data = radar.str();
-                        cv::putText(frame, tag, CvPoint(d[3] * frame.cols,d[4] * frame.rows-10), 2, 1, cv::Scalar(0,155,133));
-                        cv::rectangle(frame, x1, x2, cv::Scalar(0,155,133), 4, 1, 0);
-                        cv::putText(frame,data,CvPoint(d[3] * frame.cols,d[4] * frame.rows+20),2,1,cv::Scalar(0,155,133));
+                        cv::putText(frame, tag, CvPoint(d[3] * frame.cols,d[4] * frame.rows-10), 2, 1, cv::Scalar(0,50,200));
+                        cv::rectangle(frame, x1, x2, cv::Scalar(0,50,200), 4, 1, 0);
+                        cv::putText(frame,data,CvPoint(d[3] * frame.cols,d[4] * frame.rows+20),2,1,cv::Scalar(0,50,200));
                         break;
                     }
                     else{
